@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!--不需要配置，系统会自动识别-->
+        <setting name="logImpl" value="SLF4J"/>
+
+        <!-- 延迟加载，默认：false -->
+        <!--<setting name="lazyLoadingEnabled" value="true"/>-->
+        <!-- 延迟加载的对象在调用时进行完整加载：true，按需加载：false，默认：true -->
+        <!--<setting name="aggressiveLazyLoading" value="false"/>-->
+
+        <!-- 将数据库的列名a_column映射到Java的aColumn，默认：false -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+    <typeAliases>
+        <!--配合@Alias注解使用，当不写@Alias注解时也会装载，默认别名为类名第一个字母小写-->
+        <!--<typeAlias alias="user" tycom.dongql.orm.entity.UserUser"/>-->
+        <package name="com.dongql.mybatis.tenant.entity"/>
+    </typeAliases>
+
+    <typeHandlers>
+        <typeHandler handler="com.dongql.mybatis.tenant.enums.base.EntityEnumTypeHandler"
+                     javaType="com.dongql.mybatis.tenant.enums.Gender"/>
+        <typeHandler handler="com.dongql.mybatis.tenant.enums.base.EntityEnumTypeHandler"
+                     javaType="com.dongql.mybatis.tenant.enums.PermissionType"/>
+        <typeHandler handler="com.dongql.mybatis.tenant.enums.base.EntityEnumTypeHandler"
+                     javaType="com.dongql.mybatis.tenant.enums.Status"/>
+    </typeHandlers>
+
+    <plugins>
+        <plugin interceptor="com.dongql.mybatis.tenant.MultiTenantInterceptor">
+            <property name="dbType" value="mysql"/>
+            <property name="entityPackage" value="com.dongql.mybatis.tenant.entity"/>
+        </plugin>
+    </plugins>
+
+    <mappers>
+        <!--<mapper resource="com/dongql/orm/mybatis/mapper/UserMapper.xml"/>-->
+        <package name="com.dongql.mybatis.tenant.mapper"/>
+    </mappers>
+
+</configuration>

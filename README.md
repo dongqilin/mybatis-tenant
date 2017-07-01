@@ -1,2 +1,1 @@
-# mybatis-tenant
-MyBatis Tenent plugin
+# MyBatis Tenant plugin

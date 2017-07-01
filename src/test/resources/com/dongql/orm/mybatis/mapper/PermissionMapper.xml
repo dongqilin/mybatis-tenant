@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dongql.mybatis.tenant.mapper.IPermissionMapper">
+
+    <select id="getPermissions" resultType="userPermission">
+        SELECT * FROM user_permission
+        <where>
+            permission_id IN
+            <foreach collection="permissions" item="permission" open="(" separator="," close=")">
+              #{permission}
+            </foreach>
+        </where>
+    </select>
+
+</mapper>
