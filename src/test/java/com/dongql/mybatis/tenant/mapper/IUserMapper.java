@@ -19,6 +19,8 @@ public interface IUserMapper {
 
     List<User> getUserByMap(Map<String, Object> user);
 
+    List<User> getUserByName(@Param("userName") String userName);
+
     List<User> getUserByBean(@Param("user") User user);
 
     int insertUser(@Param("user") User user);

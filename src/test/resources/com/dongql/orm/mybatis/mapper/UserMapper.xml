@@ -3,7 +3,12 @@
 <mapper namespace="com.dongql.mybatis.tenant.mapper.IUserMapper">
 
     <select id="getUser" parameterType="Long" resultType="user">
-        SELECT * FROM user WHERE uid = #{userId}
+        SELECT * FROM user u WHERE uid = #{userId}
+    </select>
+
+    <select id="getUserByName" parameterType="String" resultType="user">
+        <bind name="likeUsername" value="'%' + userName + '%'"/>
+        select * from user where user_name LIKE #{likeUsername}
     </select>
 
     <select id="getUserByMap" parameterType="Map" resultType="user">
