@@ -1,6 +1,5 @@
 package com.dongql.mybatis.tenant.cache;
 
-import com.dongql.mybatis.tenant.SQLParserUtil;
 import com.dongql.mybatis.tenant.exception.SQLParseException;
 
 import java.util.HashMap;
@@ -22,7 +21,7 @@ public class SQLCache {
     private List<String> param;
 
     private SQLCache(String sql, List<String> param) {
-        this.sql = SQLParserUtil.parse(sql);
+//        this.sql = SQLParserUtil.parse(sql);
         this.param = param;
     }
 

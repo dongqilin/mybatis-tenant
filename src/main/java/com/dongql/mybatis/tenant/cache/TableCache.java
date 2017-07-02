@@ -28,7 +28,7 @@ public class TableCache {
         return new TableCache(name, MultiTenantType.SCHEMA, null);
     }
 
-    public static TableCache newTabelCache(String name) {
+    public static TableCache newTableCache(String name) {
         return new TableCache(name, MultiTenantType.TABLE, null);
     }
 
@@ -36,8 +36,28 @@ public class TableCache {
         return new TableCache(name, MultiTenantType.COLUMN, column);
     }
 
+    public static TableCache newDatabaseCache(String name) {
+        return new TableCache(name, MultiTenantType.DATABASE, null);
+    }
+
+    public static TableCache none(String name) {
+        return new TableCache(name, MultiTenantType.NONE, null);
+    }
+
     public static TableCache get(String name) {
         return CACHE.getOrDefault(name, null);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public MultiTenantType getType() {
+        return type;
+    }
+
+    public String getColumn() {
+        return column;
     }
 
     @Override
