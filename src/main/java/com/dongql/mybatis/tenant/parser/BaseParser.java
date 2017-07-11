@@ -6,7 +6,6 @@ import com.dongql.mybatis.tenant.cache.ParsedParam;
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
 import com.dongql.mybatis.tenant.cache.TableCache;
 
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,8 +31,6 @@ public abstract class BaseParser {
 
     ParsedSQL<String> parse(int nameIndex, int aliasIndex) {
 
-        StringJoiner table = new StringJoiner(",");
-
         Matcher matcher = pattern.matcher(sql);
         if (matcher.find()) {
 
@@ -58,13 +55,12 @@ public abstract class BaseParser {
                 case DATABASE:
                     break;
             }
-            table.add(name);
         }
-        if (result != null) {
-            parsedSQL.setSql(result.toString());
-            return parsedSQL;
-        }
-        return null;
+
+        if (result == null) return null;
+        parsedSQL.setSql(result.toString());
+        return parsedSQL;
+
     }
 
     public void parseSchema(Matcher matcher, String group, String name) {
