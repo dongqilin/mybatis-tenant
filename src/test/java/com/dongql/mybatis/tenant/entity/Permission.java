@@ -12,8 +12,8 @@ import java.io.Serializable;
  * Created by dongql on 10/01/2016.
  */
 @Entity
-@Table(name = "user_permission")
-@Alias("userPermission")
+@Table(name = "sys_permission")
+@Alias("sysPermission")
 public class Permission implements Serializable {
 
     private Long permissionId;

@@ -21,8 +21,8 @@ public class StaticData implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dataId;
 
-    private String dataType;
     private String dataKey;
+    private String dataCode;
     private String dataValue;
     private Status status;
     private Integer order;
@@ -30,7 +30,7 @@ public class StaticData implements Serializable {
 
     @Override
     public String toString() {
-        return dataType + ":" + dataKey + ">" + dataValue;
+        return dataKey + ":" + dataCode + ">" + dataValue;
     }
 
     public Long getDataId() {
@@ -39,14 +39,6 @@ public class StaticData implements Serializable {
 
     public void setDataId(Long dataId) {
         this.dataId = dataId;
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
     }
 
     public String getDataKey() {
@@ -87,5 +79,13 @@ public class StaticData implements Serializable {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getDataCode() {
+        return dataCode;
+    }
+
+    public void setDataCode(String dataCode) {
+        this.dataCode = dataCode;
     }
 }

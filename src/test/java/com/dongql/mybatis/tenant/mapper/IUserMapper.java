@@ -1,6 +1,8 @@
 package com.dongql.mybatis.tenant.mapper;
 
 import com.dongql.mybatis.tenant.entity.User;
+import com.dongql.mybatis.tenant.entity.vo.UserPasswordVo;
+import com.dongql.mybatis.tenant.entity.vo.UserVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -13,6 +15,10 @@ import java.util.Map;
 public interface IUserMapper {
 
     User getUser(@Param("userId") Long uid);
+
+    UserVo getUserWithVip(@Param("userId") Long uid);
+
+    UserPasswordVo getUserWithPassword(@Param("userId") Long uid);
 
     @Select("SELECT * FROM user")
     List<User> getUsers();

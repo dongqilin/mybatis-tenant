@@ -6,6 +6,14 @@
         SELECT * FROM user u WHERE uid = #{userId}
     </select>
 
+    <select id="getUserWithVip" parameterType="Long" resultType="UserVo">
+        SELECT u.*, d.data_value vipName FROM user u join sys_static_data d on d.data_key='vip_level' and d.data_code = u.vip WHERE u.uid = #{userId}
+    </select>
+
+    <select id="getUserWithPassword" parameterType="Long" resultType="UserPasswordVo">
+        SELECT u.*, p.password, p.salt FROM user u join user_password p on u.uid = p.uid WHERE u.uid = #{userId}
+    </select>
+
     <select id="getUserByName" parameterType="String" resultType="user">
         <bind name="likeUsername" value="'%' + userName + '%'"/>
         select * from user where user_name LIKE #{likeUsername}

@@ -1,15 +1,16 @@
 package com.dongql.mybatis.tenant;
 
-import com.dongql.mybatis.tenant.annotations.MultiTenantType;
-import com.dongql.mybatis.tenant.cache.ParsedParam;
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
-import com.dongql.mybatis.tenant.cache.TableCache;
+import com.dongql.mybatis.tenant.parser.DeleteParser;
+import com.dongql.mybatis.tenant.parser.InsertParser;
+import com.dongql.mybatis.tenant.parser.JoinParser;
+import com.dongql.mybatis.tenant.parser.SelectParser;
+import com.dongql.mybatis.tenant.parser.UpdateParser;
+import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
  * 解析SQL，分析所有表，根据表的租户类型重新生成SQL
@@ -20,61 +21,8 @@ public class SQLParserUtil {
     private SQLParserUtil() {
     }
 
-    private static String tableNamePattern = "([a-zA-Z0-9_]*)";
-    private static Pattern select = Pattern.compile(" from " + tableNamePattern + " " + tableNamePattern + "[, ]+", CASE_INSENSITIVE);
-    private static Pattern join = Pattern.compile(" (left|right|outer)+ join " + tableNamePattern + " ", CASE_INSENSITIVE);
-    private static Pattern insertInto = Pattern.compile("^insert into " + tableNamePattern + " ", CASE_INSENSITIVE);
-    private static Pattern update = Pattern.compile("^update " + tableNamePattern + " ", CASE_INSENSITIVE);
-    private static Pattern deleteFrom = Pattern.compile("^delete from " + tableNamePattern + " ", CASE_INSENSITIVE);
-
-    public static ParsedSQL<String> parse(String sql) {
-        ParsedSQL<String> parsedSQL = new ParsedSQL<>();
-        StringBuilder result = new StringBuilder(sql);
-        StringJoiner table = new StringJoiner(",");
-        String tenant = TenantContext.get();
-        Matcher matcher = select.matcher(sql);
-        StringBuffer buffer = new StringBuffer();
-        int start = 0, end;
-        while (matcher.find()) {
-            String group = matcher.group();
-            String name = matcher.group(1);
-            String alias = matcher.group(2);
-            TableCache cache = TableCache.get(name);
-            MultiTenantType type = cache.getType();
-            int i = matcher.start();
-            end = matcher.end();
-
-            switch (type) {
-                case NONE:
-                    break;
-                case COLUMN:
-                    String temp = sql.toLowerCase().contains("where") ? " and " : " where ";
-                    boolean ifNoAlias = alias == null || alias.isEmpty() || alias.equalsIgnoreCase("where");
-                    String column = cache.getColumn();
-                    ParsedParam<String> param = new ParsedParam<>(column, tenant, String.class);
-                    parsedSQL.addParam(param);
-                    result.append(temp)
-                            .append(ifNoAlias ? name : alias).append(".")
-                            .append(column).append(" = ?");
-                    break;
-                case TABLE:
-                    break;
-                case SCHEMA:
-                    buffer.append(sql.substring(start, i));
-                    matcher.appendReplacement(buffer, tenant + "." + name);
-                    break;
-                case DATABASE:
-                    break;
-            }
-            start = end;
-            table.add(name);
-        }
-        parsedSQL.setSql(result.toString());
-        return parsedSQL;
-    }
-
     /**
-     * 把驼峰形式转化为下划线连接形式，如UserPermission -> user_permission
+     * 把驼峰形式转化为下划线连接形式，如SysStaticDate -> sys_static_data
      *
      * @param name 驼峰形式
      * @return 下划线连接形式
@@ -88,5 +36,31 @@ public class SQLParserUtil {
         return table.toString();
     }
 
-
+    /**
+     * SQL解析入口，根据类型进行分发
+     *
+     * @param id   mapper的唯一ID
+     * @param type SQL语句类型
+     * @param sql  SQL
+     * @return 存在租户配置返回解析之后的SQL与参数，否则返回NULL
+     */
+    public static ParsedSQL<String> parse(String id, SqlCommandType type, String sql) {
+        switch (type) {
+            case INSERT:
+                return new InsertParser(sql).parse();
+            case UPDATE:
+                return new UpdateParser(sql).parse();
+            case DELETE:
+                return new DeleteParser(sql).parse();
+            case SELECT:
+                ParsedSQL<String> result = new SelectParser(sql).parse();
+                ParsedSQL<String> joinResult = new JoinParser(result).parse();
+                return joinResult == null ? result : joinResult;
+            case UNKNOWN:
+                break;
+            case FLUSH:
+                break;
+        }
+        return null;
+    }
 }

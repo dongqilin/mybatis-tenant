@@ -23,6 +23,8 @@
 
     <typeHandlers>
         <typeHandler handler="com.dongql.mybatis.tenant.enums.base.EntityEnumTypeHandler"
+                     javaType="com.dongql.mybatis.tenant.enums.VipLevel"/>
+        <typeHandler handler="com.dongql.mybatis.tenant.enums.base.EntityEnumTypeHandler"
                      javaType="com.dongql.mybatis.tenant.enums.Gender"/>
         <typeHandler handler="com.dongql.mybatis.tenant.enums.base.EntityEnumTypeHandler"
                      javaType="com.dongql.mybatis.tenant.enums.PermissionType"/>
@@ -33,6 +35,7 @@
     <plugins>
         <plugin interceptor="com.dongql.mybatis.tenant.MultiTenantInterceptor">
             <property name="tenantKey" value="tenant_id"/>
+            <property name="schemaPrefix" value="tenant_"/>
         </plugin>
     </plugins>
 

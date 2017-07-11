@@ -1,6 +1,5 @@
 package com.dongql.mybatis.tenant;
 
-import com.dongql.mybatis.tenant.cache.ParsedSQL;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +23,8 @@ public class UtilTest {
     @Test
     public void select() {
         String sql = "select * from user where uid = ?";
-        ParsedSQL<String> result = SQLParserUtil.parse(sql);
-        System.out.println(result.getSql());
+//        ParsedSQL<String> result = SQLParserUtil.parse(sql);
+//        System.out.println(result.getSql());
     }
 
 }

@@ -11,10 +11,10 @@ import java.util.List;
  */
 public interface IStaticDataMapper {
 
-    @Select("SELECT * FROM sys_static_data WHERE data_type = #{type} and data_key = #{key}")
-    StaticData getData(@Param("type") String type, @Param("key") String key);
+    @Select("SELECT * FROM sys_static_data WHERE data_key = #{key} and data_code = #{code}")
+    StaticData getData(@Param("key") String key, @Param("code") String code);
 
-    @Select("SELECT * FROM sys_static_data WHERE data_type = #{type}")
-    List<StaticData> getDataList(@Param("type") String type);
+    @Select("SELECT * FROM sys_static_data WHERE data_key = #{key}")
+    List<StaticData> getDataList(@Param("key") String key);
 
 }

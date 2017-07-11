@@ -9,8 +9,15 @@ import com.dongql.mybatis.tenant.cache.TableCache;
 import com.dongql.mybatis.tenant.exception.TenantAnnotationException;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
-import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.plugin.Intercepts;
+import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
+import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
@@ -21,7 +28,10 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.sql.Connection;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -42,6 +52,7 @@ public class MultiTenantInterceptor implements Interceptor {
     private static transient Logger logger = LoggerFactory.getLogger(MultiTenantInterceptor.class);
 
     public static String tenantKey = null;
+    public static String schemaPrefix = "";
 
     private static AtomicBoolean initialized = new AtomicBoolean(false);
 
@@ -49,20 +60,27 @@ public class MultiTenantInterceptor implements Interceptor {
     public Object intercept(Invocation invocation) throws Throwable {
         StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
         MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);
-
         Configuration configuration = (Configuration) metaStatementHandler.getValue("delegate.configuration");
-        List<ParameterMapping> parameterMappings = (List<ParameterMapping>) metaStatementHandler.getValue("delegate.boundSql.parameterMappings");
-        Map<String, Object> additionalParameters = (Map<String, Object>) metaStatementHandler.getValue("delegate.boundSql.additionalParameters");
 
-        String sql = (String) metaStatementHandler.getValue("delegate.boundSql.sql");
+        MappedStatement mappedStatement = (MappedStatement) metaStatementHandler.getValue("delegate.mappedStatement");
+        String id = mappedStatement.getId();
+        SqlCommandType type = mappedStatement.getSqlCommandType();
+
+        BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
+        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        String sql = boundSql.getSql();
         logger.debug("before tenant interceptor: " + sql);
-        ParsedSQL<String> result = SQLParserUtil.parse(sql);
+
+        ParsedSQL<String> result = SQLParserUtil.parse(id, type, sql);
+        if (result == null) return invocation.proceed();
 
         List<ParsedParam<String>> params = result.getParams();
-        for(ParsedParam<String> p : params){
-            ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
-            parameterMappings.add(mapping);
-            additionalParameters.put(p.getParam(), p.getValue());
+        if (params != null) {
+            for (ParsedParam<String> p : params) {
+                ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
+                parameterMappings.add(mapping);
+                boundSql.setAdditionalParameter(p.getParam(), p.getValue());
+            }
         }
 
         metaStatementHandler.setValue("delegate.boundSql.sql", result.getSql());
@@ -144,6 +162,9 @@ public class MultiTenantInterceptor implements Interceptor {
     public void setProperties(Properties properties) {
         if (properties.containsKey("tenantKey")) {
             tenantKey = properties.get("tenantKey").toString();
+        }
+        if (properties.containsKey("schemaPrefix")) {
+            schemaPrefix = properties.get("schemaPrefix").toString();
         }
     }
 

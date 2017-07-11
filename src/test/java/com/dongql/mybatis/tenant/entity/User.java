@@ -5,6 +5,7 @@ import com.dongql.mybatis.tenant.annotations.MultiTenant;
 import com.dongql.mybatis.tenant.annotations.MultiTenantColumn;
 import com.dongql.mybatis.tenant.annotations.MultiTenantType;
 import com.dongql.mybatis.tenant.enums.Gender;
+import com.dongql.mybatis.tenant.enums.VipLevel;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -27,6 +28,8 @@ public class User implements Serializable {
 
     private String userName;
     private Gender gender;
+    private VipLevel vip;
+
     private String tenant;
 
     @Override
@@ -64,5 +67,13 @@ public class User implements Serializable {
 
     public void setTenant(String tenant) {
         this.tenant = tenant;
+    }
+
+    public VipLevel getVip() {
+        return vip;
+    }
+
+    public void setVip(VipLevel vip) {
+        this.vip = vip;
     }
 }
