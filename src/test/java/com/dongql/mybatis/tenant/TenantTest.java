@@ -8,7 +8,9 @@ import com.dongql.mybatis.tenant.enums.Gender;
 import com.dongql.mybatis.tenant.enums.VipLevel;
 import com.dongql.mybatis.tenant.mapper.IStaticDataMapper;
 import com.dongql.mybatis.tenant.mapper.IUserMapper;
+import com.dongql.mybatis.tenant.service.interfaces.IUserService;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,18 +25,30 @@ import java.util.List;
 public class TenantTest extends AbstractJUnit4SpringContextTests {
 
     @Autowired
+    private IUserService userService;
+    @Autowired
     private IUserMapper userMapper;
     @Autowired
     private IStaticDataMapper staticDataMapper;
 
+    private User user;
+
+    @BeforeClass
+    public static void initG(){
+
+    }
+
     @Before
     public void init() {
         TenantContext.set("dongql");
+        user = new User();
+        user.setGender(Gender.FEMALE);
+        user.setUserName("xxxxx");
+        user.setVip(VipLevel.DIAMOND);
     }
 
     @Test
     public void tenant() {
-        long uid = 11111L;
 
         userMapper.getUser(600841005L);
         userMapper.getUserByName("其林");
@@ -48,19 +62,27 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
         UserPasswordVo userWithPassword = userMapper.getUserWithPassword(600841005L);
         System.out.println(userWithPassword);
 
-        User user = new User();
-        user.setUid(uid);
-        user.setGender(Gender.FEMALE);
-        user.setUserName("xxxxx");
-        user.setVip(VipLevel.DIAMOND);
+
         userMapper.insertUser(user);
 
         user.setUserName("yyyyyyyy");
         userMapper.updateUser(user);
 
-        userMapper.deleteUser(uid);
+        userMapper.deleteUser(user.getUid());
 
     }
 
+    @Test
+    public void service(){
+        userService.save(user);
 
+        user.setUserName("yyyyyyyy");
+        userService.update(user);
+
+        User u = userService.get(user.getUid());
+        System.out.println(u);
+
+        userService.delete(this.user);
+
+    }
 }

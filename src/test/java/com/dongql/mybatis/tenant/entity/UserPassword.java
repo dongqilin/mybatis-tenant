@@ -8,6 +8,7 @@ import com.dongql.mybatis.tenant.enums.Gender;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.io.Serializable;
 
 /**
@@ -24,6 +25,9 @@ public class UserPassword implements Serializable {
 
     private String password;
     private Gender salt;
+
+    @Transient
+    private String tenantId;
 
     @Override
     public String toString() {
@@ -52,5 +56,13 @@ public class UserPassword implements Serializable {
 
     public void setSalt(Gender salt) {
         this.salt = salt;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

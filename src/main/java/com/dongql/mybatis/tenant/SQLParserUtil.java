@@ -54,6 +54,7 @@ public class SQLParserUtil {
                 return new DeleteParser(sql).parse();
             case SELECT:
                 ParsedSQL<String> result = new SelectParser(sql).parse();
+                if (result == null) return null;
                 ParsedSQL<String> joinResult = new JoinParser(result).parse();
                 return joinResult == null ? result : joinResult;
             case UNKNOWN:

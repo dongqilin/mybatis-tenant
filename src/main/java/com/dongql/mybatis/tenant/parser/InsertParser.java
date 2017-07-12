@@ -21,7 +21,7 @@ public class InsertParser extends BaseParser {
         this.parsedSQL = new ParsedSQL<>();
         this.sql = sql;
         this.pattern = Pattern.compile("^insert into " + TABLE_NAME + " ", CASE_INSENSITIVE);
-        this.values = Pattern.compile("\\) value \\(", CASE_INSENSITIVE);
+        this.values = Pattern.compile("[ ]?\\) value[s ]?\\([ ]?", CASE_INSENSITIVE);
     }
 
     public ParsedSQL<String> parse() {
@@ -37,7 +37,7 @@ public class InsertParser extends BaseParser {
         if (matcher.find()) {
             if (result == null) result = new StringBuffer();
             String valuesKeyword = matcher.group();
-            matcher.appendReplacement(result, ", " + column + valuesKeyword + "?, ");
+            matcher.appendReplacement(result, "," + column + valuesKeyword + "?,");
             parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class));
         }
 

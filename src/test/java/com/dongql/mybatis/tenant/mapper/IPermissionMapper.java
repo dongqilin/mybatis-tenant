@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * 权限管理
  * Created by dongql on 10/01/2016.
  */
-public interface IPermissionMapper {
+public interface IPermissionMapper extends Mapper<Permission> {
 
     @Select("SELECT * FROM user_permission WHERE permission_id = #{permissionId}")
     Permission getPermission(@Param("permissionId") Long id);

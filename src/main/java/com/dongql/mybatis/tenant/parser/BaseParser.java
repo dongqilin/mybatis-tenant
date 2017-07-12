@@ -58,9 +58,9 @@ public abstract class BaseParser {
         }
 
         if (result == null) return null;
+
         parsedSQL.setSql(result.toString());
         return parsedSQL;
-
     }
 
     public void parseSchema(Matcher matcher, String group, String name) {
