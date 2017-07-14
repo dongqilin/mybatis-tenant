@@ -8,11 +8,13 @@ public class ParsedParam<T> {
     private String param;
     private T value;
     private Class<T> javaType;
+    private int position;
 
-    public ParsedParam(String param, T value, Class<T> javaType) {
+    public ParsedParam(String param, T value, Class<T> javaType, int position) {
         this.param = param;
         this.value = value;
         this.javaType = javaType;
+        this.position = position;
     }
 
     public String getParam() {
@@ -37,5 +39,13 @@ public class ParsedParam<T> {
 
     public void setJavaType(Class<T> javaType) {
         this.javaType = javaType;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 }

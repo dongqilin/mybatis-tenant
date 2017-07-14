@@ -38,7 +38,7 @@ public class InsertParser extends BaseParser {
             if (result == null) result = new StringBuffer();
             String valuesKeyword = matcher.group();
             matcher.appendReplacement(result, "," + column + valuesKeyword + "?,");
-            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class));
+            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, -1));
         }
 
         matcher.appendTail(result);

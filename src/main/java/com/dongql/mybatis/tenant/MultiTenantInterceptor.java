@@ -54,7 +54,7 @@ public class MultiTenantInterceptor implements Interceptor {
     public static String tenantKey = null;
     public static String schemaPrefix = "";
 
-    private static AtomicBoolean initialized = new AtomicBoolean(false);
+    private static AtomicBoolean initial = new AtomicBoolean(true);
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
@@ -69,7 +69,6 @@ public class MultiTenantInterceptor implements Interceptor {
         BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         String sql = boundSql.getSql();
-        logger.debug("before tenant interceptor: " + sql);
 
         ParsedSQL<String> result = SQLParserUtil.parse(id, type, sql);
         if (result == null) return invocation.proceed();
@@ -78,13 +77,18 @@ public class MultiTenantInterceptor implements Interceptor {
         if (params != null) {
             for (ParsedParam<String> p : params) {
                 ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
-                parameterMappings.add(mapping);
+                int position = p.getPosition();
+                if (position > 0)
+                    parameterMappings.add(parameterMappings.size() - position, mapping);
+                else
+                    parameterMappings.add(mapping);
                 boundSql.setAdditionalParameter(p.getParam(), p.getValue());
             }
         }
+        if (logger.isDebugEnabled())
+            logger.debug("tenant interceptor: \nbefore: " + sql + "\n after: " + result.getSql());
 
         metaStatementHandler.setValue("delegate.boundSql.sql", result.getSql());
-//        logger.debug("after tenant interceptor: " + result.getSql());
 
         return invocation.proceed();
     }
@@ -92,68 +96,72 @@ public class MultiTenantInterceptor implements Interceptor {
     @Override
     public Object plugin(Object target) {
 
-        if (target instanceof Executor && !initialized.get()) {
-            initialized.compareAndSet(false, true);
-            logger.debug("parse all entity from annotation: @MultiTenant");
+        if (target instanceof Executor) {
             MetaObject metaExecutor = SystemMetaObject.forObject(target);
-            HashMap<String, Class> typeAliases = (HashMap<String, Class>) metaExecutor.getValue("delegate.configuration.typeAliasRegistry.TYPE_ALIASES");
+            String name = "delegate.configuration.typeAliasRegistry.TYPE_ALIASES";
+            if (initial.get() && metaExecutor.hasGetter(name)) {
+                logger.debug("parse all entity from annotation: @MultiTenant");
+                HashMap<String, Class> typeAliases = (HashMap<String, Class>) metaExecutor.getValue(name);
 
-            // 找到系统中所有注解了@Entity的类
-            Set<Class> entities = typeAliases.values().stream().filter(v -> {
-                for (Annotation an : v.getAnnotations()) {
-                    if (an instanceof Entity) return true;
-                }
-                return false;
-            }).collect(Collectors.toSet());
+                // 找到系统中所有注解了@Entity的类
+                Set<Class> entities = typeAliases.values().stream().filter(v -> {
+                    for (Annotation an : v.getAnnotations()) {
+                        if (an instanceof Entity) return true;
+                    }
+                    return false;
+                }).collect(Collectors.toSet());
 
-            // 进一步分析多租户注解，缓存起来备用
-            entities.forEach(entity -> {
+                // 进一步分析多租户注解，缓存起来备用
+                entities.forEach(entity -> {
 
-                String table = null;
-                MultiTenantType type = null;
+                    String table = null;
+                    MultiTenantType type = null;
 //                String contextProperty = null;
-                String column = null;
+                    String column = null;
 
-                Annotation[] annotations = entity.getAnnotations();
-                for (Annotation an : annotations) {
-                    if (an instanceof Table) {
-                        Table e = (Table) an;
-                        table = e.name();
-                    } else if (an instanceof MultiTenant) {
-                        MultiTenant tenant = (MultiTenant) an;
-                        type = tenant.type();
+                    Annotation[] annotations = entity.getAnnotations();
+                    for (Annotation an : annotations) {
+                        if (an instanceof Table) {
+                            Table e = (Table) an;
+                            table = e.name();
+                        } else if (an instanceof MultiTenant) {
+                            MultiTenant tenant = (MultiTenant) an;
+                            type = tenant.type();
 //                        contextProperty = tenant.contextProperty();
-                    } else if (an instanceof MultiTenantColumn) {
-                        MultiTenantColumn tenant = (MultiTenantColumn) an;
-                        column = tenant.value();
+                        } else if (an instanceof MultiTenantColumn) {
+                            MultiTenantColumn tenant = (MultiTenantColumn) an;
+                            column = tenant.value();
+                        }
                     }
-                }
 
-                if (table == null || table.isEmpty()) {
-                    table = tableName(entity.getSimpleName());
-                }
-
-                if (type == null) {
-                    TableCache.none(table);
-                } else {
-                    switch (type) {
-                        case COLUMN:
-                            if (column == null)
-                                throw new TenantAnnotationException(entity.getName() + " annotated by @MultiTenant[COLUMN] without @MultiTenantColumn");
-                            TableCache.newColumnCache(table, column);
-                            break;
-                        case TABLE:
-                            TableCache.newTableCache(table);
-                            break;
-                        case SCHEMA:
-                            TableCache.newSchemaCache(table);
-                            break;
-                        case DATABASE:
-                            TableCache.newDatabaseCache(table);
-                            break;
+                    if (table == null || table.isEmpty()) {
+                        table = tableName(entity.getSimpleName());
                     }
-                }
-            });
+
+                    if (type == null) {
+                        TableCache.none(table);
+                    } else {
+                        switch (type) {
+                            case COLUMN:
+                                if (column == null)
+                                    throw new TenantAnnotationException(entity.getName() + " annotated by @MultiTenant[COLUMN] without @MultiTenantColumn");
+                                TableCache.newColumnCache(table, column);
+                                break;
+                            case TABLE:
+                                TableCache.newTableCache(table);
+                                break;
+                            case SCHEMA:
+                                TableCache.newSchemaCache(table);
+                                break;
+                            case DATABASE:
+                                TableCache.newDatabaseCache(table);
+                                break;
+                        }
+                    }
+                });
+
+                initial.compareAndSet(true, false);
+            }
         }
         return Plugin.wrap(target, this);
     }

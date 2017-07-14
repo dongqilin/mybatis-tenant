@@ -43,8 +43,8 @@
     </bean>
 
     <!--<bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">-->
-        <!--<property name="mapperInterface" value="com.dongql.mybatis.tenant.mapper.IUserMapper"/>-->
-        <!--<property name="sqlSessionFactory" ref="sqlSessionFactory"/>-->
+    <!--<property name="mapperInterface" value="com.dongql.mybatis.tenant.mapper.IUserMapper"/>-->
+    <!--<property name="sqlSessionFactory" ref="sqlSessionFactory"/>-->
     <!--</bean>-->
 
 </beans>

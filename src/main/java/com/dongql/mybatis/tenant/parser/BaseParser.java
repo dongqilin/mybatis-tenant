@@ -18,6 +18,7 @@ import static com.dongql.mybatis.tenant.MultiTenantInterceptor.schemaPrefix;
 public abstract class BaseParser {
 
     static final String TABLE_NAME = "([a-zA-Z0-9_]*)";
+    static final Pattern suffix = Pattern.compile(" (group by|order by|limit)", Pattern.CASE_INSENSITIVE);
 
     String tenant = TenantContext.get();
 
@@ -76,11 +77,25 @@ public abstract class BaseParser {
 
         String temp = sql.toLowerCase().contains("where") ? " and " : " where ";
         boolean ifNoAlias = alias == null || alias.isEmpty() || alias.equalsIgnoreCase("where");
-        parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class));
         if (result == null) result = new StringBuffer(sql);
-        result.append(temp)
+        StringBuilder tenantClause = new StringBuilder().append(temp)
                 .append(ifNoAlias ? name : alias).append(".")
                 .append(column).append(" = ?");
+        Matcher matcher = suffix.matcher(sql);
+        int position = -1;
+        if (matcher.find()) {
+            int start = matcher.start();
+            position = position(sql, start);
+            result.insert(start, tenantClause.toString());
+        } else {
+            result.append(tenantClause.toString());
+        }
+        parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));
+    }
+
+    private int position(String sql, int start){
+        String substring = sql.substring(start);
+        return substring.length() - substring.replaceAll("\\?", "").length();
     }
 
 }

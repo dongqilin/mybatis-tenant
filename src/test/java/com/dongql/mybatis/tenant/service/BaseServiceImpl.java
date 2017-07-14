@@ -144,9 +144,6 @@ public abstract class BaseServiceImpl<T> implements BaseService<T> {
             pager = new Pager<>();
         }
         PageHelper.startPage(pager.getOffset(), pager.getLimit());
-        if (pager.getSort() != null && !pager.getSort().isEmpty()) {
-            PageHelper.orderBy(pager.getSort() + " " + pager.getOrder());
-        }
         List<T> list = callback.getList();
         PageInfo<T> pageInfo = new PageInfo<T>(list);
         pager.setTotal(pageInfo.getTotal());

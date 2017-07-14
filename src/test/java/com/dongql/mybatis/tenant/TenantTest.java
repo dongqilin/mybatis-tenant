@@ -62,7 +62,6 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
         UserPasswordVo userWithPassword = userMapper.getUserWithPassword(600841005L);
         System.out.println(userWithPassword);
 
-
         userMapper.insertUser(user);
 
         user.setUserName("yyyyyyyy");
@@ -83,6 +82,16 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
         System.out.println(u);
 
         userService.delete(this.user);
-
     }
+
+    @Test
+    public void pager(){
+        Pager<User> pager = new Pager<>();
+        pager.setUsePager(true);
+        pager.setOffset(2);
+        pager.setLimit(3);
+        List<User> user = userService.getUser(pager, "xxx");
+        System.out.println(user);
+    }
+
 }

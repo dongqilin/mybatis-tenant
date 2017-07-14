@@ -37,6 +37,12 @@
             <property name="tenantKey" value="tenant_id"/>
             <property name="schemaPrefix" value="tenant_"/>
         </plugin>
+        <plugin interceptor="com.github.pagehelper.PageHelper">
+            <property name="dialect" value="mysql"/>
+            <property name="reasonable" value="true"/>
+            <property name="rowBoundsWithCount" value="true"/>
+            <property name="pageSizeZero" value="true"/>
+        </plugin>
     </plugins>
 
     <mappers>

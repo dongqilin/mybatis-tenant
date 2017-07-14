@@ -36,13 +36,15 @@
         <dependency>
             <groupId>tk.mybatis</groupId>
             <artifactId>mapper</artifactId>
-            <version>3.3.9</version>
+            <version>3.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper</artifactId>
+            <!--<version>5.0.3</version>-->
             <version>4.1.4</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
