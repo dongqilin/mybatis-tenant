@@ -27,8 +27,7 @@ public class TableCache {
         this.name = name;
         this.type = type;
         this.column = column;
-        if (schema != null && schema.length() > 0)
-            this.schema = schema + ".";
+        this.schema = schema == null ? "" : schema + ".";
         CACHE.put(name, this);
     }
 
@@ -78,7 +77,7 @@ public class TableCache {
 
     @Override
     public String toString() {
-        return (schema == null ? "" : schema) + name + ":" + type.name() + (column == null ? "" : "[" + column + "]");
+        return schema + name + ":" + type.name() + (column == null ? "" : "[" + column + "]");
     }
 
 }
