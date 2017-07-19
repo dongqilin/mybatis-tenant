@@ -17,10 +17,18 @@ public class TableCache {
     private MultiTenantType type;
     private String column;
 
+    private String schema;
+
     private TableCache(String name, MultiTenantType type, String column) {
+        this(null, name, type, column);
+    }
+
+    private TableCache(String schema, String name, MultiTenantType type, String column) {
         this.name = name;
         this.type = type;
         this.column = column;
+        if (schema != null && schema.length() > 0)
+            this.schema = schema + ".";
         CACHE.put(name, this);
     }
 
@@ -32,8 +40,8 @@ public class TableCache {
         return new TableCache(name, MultiTenantType.TABLE, null);
     }
 
-    public static TableCache newColumnCache(String name, String column) {
-        return new TableCache(name, MultiTenantType.COLUMN, column);
+    public static TableCache newColumnCache(String schema, String name, String column) {
+        return new TableCache(schema, name, MultiTenantType.COLUMN, column);
     }
 
     public static TableCache newDatabaseCache(String name) {
@@ -60,9 +68,17 @@ public class TableCache {
         return column;
     }
 
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
+
     @Override
     public String toString() {
-        return name + ":" + type.name() + (column == null ? "" : "[" + column + "]");
+        return (schema == null ? "" : schema) + name + ":" + type.name() + (column == null ? "" : "[" + column + "]");
     }
 
 }

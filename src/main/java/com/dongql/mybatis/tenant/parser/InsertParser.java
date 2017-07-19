@@ -7,8 +7,6 @@ import com.dongql.mybatis.tenant.cache.TableCache;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
-
 /**
  * INSERT 语句的解析
  * Created by dongqilin on 2017/7/11.
@@ -20,8 +18,8 @@ public class InsertParser extends BaseParser {
     public InsertParser(String sql) {
         this.parsedSQL = new ParsedSQL<>();
         this.sql = sql;
-        this.pattern = Pattern.compile("^insert into " + TABLE_NAME + " ", CASE_INSENSITIVE);
-        this.values = Pattern.compile("[ ]?\\) value[s ]?\\([ ]?", CASE_INSENSITIVE);
+        this.pattern = Pattern.compile("^insert into" + TABLE_NAME + " ", mask);
+        this.values = Pattern.compile("[ ]?\\) value[s ]?\\([ ]?", mask);
     }
 
     public ParsedSQL<String> parse() {

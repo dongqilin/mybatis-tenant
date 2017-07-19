@@ -18,8 +18,8 @@ public class TestUtil {
     }
 
     private static void initCache() {
-        TableCache.newColumnCache("user", "tenant");
-        TableCache.newColumnCache("user_password", "tenant_id");
+        TableCache.newColumnCache("dongql","user", "tenant");
+        TableCache.newColumnCache("dongql","user_password", "tenant_id");
         TableCache.newSchemaCache("sys_static_data");
     }
 

@@ -24,10 +24,10 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -58,6 +58,7 @@ public class MultiTenantInterceptor implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
+
         StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
         MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);
         Configuration configuration = (Configuration) metaStatementHandler.getValue("delegate.configuration");
@@ -67,7 +68,7 @@ public class MultiTenantInterceptor implements Interceptor {
         SqlCommandType type = mappedStatement.getSqlCommandType();
 
         BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
-        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+
         String sql = boundSql.getSql();
 
         ParsedSQL<String> result = SQLParserUtil.parse(id, type, sql);
@@ -75,6 +76,11 @@ public class MultiTenantInterceptor implements Interceptor {
 
         List<ParsedParam<String>> params = result.getParams();
         if (params != null) {
+            List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+            if (parameterMappings.size() == 0) {
+                // when size == 0, mybatis lock the collections
+                parameterMappings = new ArrayList<>();
+            }
             for (ParsedParam<String> p : params) {
                 ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
                 int position = p.getPosition();
@@ -84,6 +90,7 @@ public class MultiTenantInterceptor implements Interceptor {
                     parameterMappings.add(mapping);
                 boundSql.setAdditionalParameter(p.getParam(), p.getValue());
             }
+            metaStatementHandler.setValue("delegate.boundSql.parameterMappings", parameterMappings);
         }
         if (logger.isDebugEnabled())
             logger.debug("tenant interceptor: \nbefore: " + sql + "\n after: " + result.getSql());
@@ -106,7 +113,7 @@ public class MultiTenantInterceptor implements Interceptor {
                 // 找到系统中所有注解了@Entity的类
                 Set<Class> entities = typeAliases.values().stream().filter(v -> {
                     for (Annotation an : v.getAnnotations()) {
-                        if (an instanceof Entity) return true;
+                        if (an instanceof Table) return true;
                     }
                     return false;
                 }).collect(Collectors.toSet());
@@ -114,7 +121,7 @@ public class MultiTenantInterceptor implements Interceptor {
                 // 进一步分析多租户注解，缓存起来备用
                 entities.forEach(entity -> {
 
-                    String table = null;
+                    String schema = null, table = null;
                     MultiTenantType type = null;
 //                String contextProperty = null;
                     String column = null;
@@ -124,6 +131,7 @@ public class MultiTenantInterceptor implements Interceptor {
                         if (an instanceof Table) {
                             Table e = (Table) an;
                             table = e.name();
+                            schema = e.schema();
                         } else if (an instanceof MultiTenant) {
                             MultiTenant tenant = (MultiTenant) an;
                             type = tenant.type();
@@ -145,7 +153,7 @@ public class MultiTenantInterceptor implements Interceptor {
                             case COLUMN:
                                 if (column == null)
                                     throw new TenantAnnotationException(entity.getName() + " annotated by @MultiTenant[COLUMN] without @MultiTenantColumn");
-                                TableCache.newColumnCache(table, column);
+                                TableCache.newColumnCache(schema, table, column);
                                 break;
                             case TABLE:
                                 TableCache.newTableCache(table);

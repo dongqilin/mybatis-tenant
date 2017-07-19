@@ -6,8 +6,8 @@ import com.dongql.mybatis.tenant.annotations.MultiTenantColumn;
 import com.dongql.mybatis.tenant.annotations.MultiTenantType;
 import com.dongql.mybatis.tenant.enums.Gender;
 
-import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.Serializable;
 
@@ -15,7 +15,7 @@ import java.io.Serializable;
  * 用户表，共享表实现多租户
  * Created by dongql on 10/01/2016.
  */
-@Entity
+@Table
 @MultiTenant(type = MultiTenantType.COLUMN)
 @MultiTenantColumn
 public class UserPassword implements Serializable {

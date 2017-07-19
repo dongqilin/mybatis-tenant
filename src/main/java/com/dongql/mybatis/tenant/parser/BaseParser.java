@@ -6,6 +6,8 @@ import com.dongql.mybatis.tenant.cache.ParsedParam;
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
 import com.dongql.mybatis.tenant.cache.TableCache;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,14 +19,16 @@ import static com.dongql.mybatis.tenant.MultiTenantInterceptor.schemaPrefix;
  */
 public abstract class BaseParser {
 
-    static final String TABLE_NAME = "([a-zA-Z0-9_]*)";
-    static final Pattern suffix = Pattern.compile(" (group by|order by|limit)", Pattern.CASE_INSENSITIVE);
+    static final int mask = Pattern.CASE_INSENSITIVE | Pattern.MULTILINE;
+    static final String TABLE_NAME = "[\n ]+([a-zA-Z0-9_]*)";
+    static final Pattern suffix = Pattern.compile(" (group by|order by|limit)", mask);
 
     String tenant = TenantContext.get();
 
     ParsedSQL<String> parsedSQL;
     String sql;
     Pattern pattern;
+    List<String> table = new ArrayList<>();
 
     StringBuffer result = null;
 
@@ -33,14 +37,27 @@ public abstract class BaseParser {
     ParsedSQL<String> parse(int nameIndex, int aliasIndex) {
 
         Matcher matcher = pattern.matcher(sql);
+        StringBuffer tmp = new StringBuffer();
         if (matcher.find()) {
-
-            String group = matcher.group();
+            String valuesKeyword = matcher.group();
             String name = matcher.group(nameIndex);
-            String alias = aliasIndex < 1 ? null : matcher.group(aliasIndex);
+            valuesKeyword = valuesKeyword.replace(name, TableCache.get(name).getSchema() + name);
+            matcher.appendReplacement(tmp, valuesKeyword);
+        }
+        matcher.appendTail(tmp);
+        parsedSQL.setSql(tmp.toString());
+        // 系统初始化过程中不启动多租户模式，仅启动schema改写
+        if (!TenantContext.isStarted()) return parsedSQL;
 
+        matcher = pattern.matcher(sql);
+        while (matcher.find()) {
+
+            String name = matcher.group(nameIndex);
             TableCache cache = TableCache.get(name);
             MultiTenantType type = cache.getType();
+
+            String group = matcher.group();
+            String alias = aliasIndex < 1 ? null : matcher.group(aliasIndex);
 
             switch (type) {
                 case NONE:
@@ -58,9 +75,11 @@ public abstract class BaseParser {
             }
         }
 
-        if (result == null) return null;
-
-        parsedSQL.setSql(result.toString());
+        if (result == null) {
+            parsedSQL.setSql(sql);
+        } else {
+            parsedSQL.setSql(result.toString());
+        }
         return parsedSQL;
     }
 
@@ -75,9 +94,10 @@ public abstract class BaseParser {
         TableCache cache = TableCache.get(name);
         String column = cache.getColumn();
 
+        if (result == null) result = new StringBuffer(sql);
+
         String temp = sql.toLowerCase().contains("where") ? " and " : " where ";
         boolean ifNoAlias = alias == null || alias.isEmpty() || alias.equalsIgnoreCase("where");
-        if (result == null) result = new StringBuffer(sql);
         StringBuilder tenantClause = new StringBuilder().append(temp)
                 .append(ifNoAlias ? name : alias).append(".")
                 .append(column).append(" = ?");
@@ -93,7 +113,18 @@ public abstract class BaseParser {
         parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));
     }
 
-    private int position(String sql, int start){
+    public void schema() {
+        table.forEach(v -> {
+            TableCache cache = TableCache.get(v);
+            String schema = cache.getSchema();
+            String sql = parsedSQL.getSql();
+            if (schema != null && sql != null) {
+                parsedSQL.setSql(sql.replaceAll("[\n ]+" + v, " " + schema + v));
+            }
+        });
+    }
+
+    private int position(String sql, int start) {
         String substring = sql.substring(start);
         return substring.length() - substring.replaceAll("\\?", "").length();
     }
