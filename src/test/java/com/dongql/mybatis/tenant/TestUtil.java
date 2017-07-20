@@ -7,11 +7,10 @@ import com.dongql.mybatis.tenant.cache.TableCache;
  */
 public class TestUtil {
 
-
     public static void init() {
 
-        MultiTenantInterceptor.tenantKey = "tenant";
-        MultiTenantInterceptor.schemaPrefix = "tenant_";
+//        MultiTenantInterceptor.tenantKey = "tenant";
+//        MultiTenantInterceptor.schemaPrefix = "tenant_";
 
         initCache();
         initTenant();

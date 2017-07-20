@@ -51,8 +51,10 @@ public class MultiTenantInterceptor implements Interceptor {
 
     private static transient Logger logger = LoggerFactory.getLogger(MultiTenantInterceptor.class);
 
-    public static String tenantKey = null;
-    public static String schemaPrefix = "";
+    /**
+     * all tenant schema's prefix
+     */
+    private static String schemaPrefix = "tenant_";
 
     private static AtomicBoolean initial = new AtomicBoolean(true);
 
@@ -78,7 +80,7 @@ public class MultiTenantInterceptor implements Interceptor {
         if (params != null) {
             List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
             if (parameterMappings.size() == 0) {
-                // when size == 0, mybatis lock the collections
+                /* when size == 0, mybatis lock the collections with Collections.unmodifiableCollection() */
                 parameterMappings = new ArrayList<>();
             }
             for (ParsedParam<String> p : params) {
@@ -176,12 +178,17 @@ public class MultiTenantInterceptor implements Interceptor {
 
     @Override
     public void setProperties(Properties properties) {
-        if (properties.containsKey("tenantKey")) {
-            tenantKey = properties.get("tenantKey").toString();
+        if (properties.containsKey("tenantStart")) {
+            boolean flag = Boolean.parseBoolean(properties.get("tenantStart").toString());
+            if (flag) TenantContext.start();
         }
         if (properties.containsKey("schemaPrefix")) {
             schemaPrefix = properties.get("schemaPrefix").toString();
         }
+    }
+
+    public static String getSchemaPrefix() {
+        return schemaPrefix;
     }
 
 }

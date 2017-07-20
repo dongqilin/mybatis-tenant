@@ -34,7 +34,7 @@
 
     <plugins>
         <plugin interceptor="com.dongql.mybatis.tenant.MultiTenantInterceptor">
-            <property name="tenantKey" value="tenant_id"/>
+            <property name="tenantStart" value="false"/>
             <property name="schemaPrefix" value="tenant_"/>
         </plugin>
         <plugin interceptor="com.github.pagehelper.PageHelper">

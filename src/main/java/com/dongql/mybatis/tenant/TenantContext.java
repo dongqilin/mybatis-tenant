@@ -19,11 +19,11 @@ public class TenantContext {
         return tenant.get();
     }
 
-    public static void start(){
-        start.set(true);
+    public static void start() {
+        start.compareAndSet(false, true);
     }
 
-    public static boolean isStarted(){
+    public static boolean isStarted() {
         return start.get();
     }
 

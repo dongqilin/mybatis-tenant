@@ -1,6 +1,9 @@
 package com.dongql.mybatis.tenant;
 
+import com.dongql.mybatis.tenant.entity.StaticData;
 import com.dongql.mybatis.tenant.entity.User;
+import com.dongql.mybatis.tenant.entity.vo.UserPasswordVo;
+import com.dongql.mybatis.tenant.entity.vo.UserVo;
 import com.dongql.mybatis.tenant.enums.Gender;
 import com.dongql.mybatis.tenant.enums.VipLevel;
 import com.dongql.mybatis.tenant.mapper.IStaticDataMapper;
@@ -49,24 +52,26 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
 
         userMapper.getUsers();
 
-//        userMapper.getUser(600841005L);
-//        userMapper.getUserByName("其林");
-//
-//        List<StaticData> vipLevel = staticDataMapper.getDataList("vip_level");
-//        System.out.println(vipLevel);
-//
-//        UserVo userWithVip = userMapper.getUserWithVip(600841005L);
-//        System.out.println(userWithVip);
-//
-//        UserPasswordVo userWithPassword = userMapper.getUserWithPassword(600841005L);
-//        System.out.println(userWithPassword);
-//
-//        userMapper.insertUser(user);
-//
-//        user.setUserName("yyyyyyyy");
-//        userMapper.updateUser(user);
-//
-//        userMapper.deleteUser(user.getUid());
+        userMapper.getUser(600841005L);
+        userMapper.getUserByName("其林");
+
+        UserPasswordVo userWithPassword = userMapper.getUserWithPassword(600841005L);
+        System.out.println(userWithPassword);
+
+        userMapper.insertUser(user);
+
+        user.setUserName("yyyyyyyy");
+        userMapper.updateUser(user);
+
+        userMapper.deleteUser(user.getUid());
+
+        TenantContext.start();
+
+        List<StaticData> vipLevel = staticDataMapper.getDataList("vip_level");
+        System.out.println(vipLevel);
+
+        UserVo userWithVip = userMapper.getUserWithVip(600841005L);
+        System.out.println(userWithVip);
 
     }
 

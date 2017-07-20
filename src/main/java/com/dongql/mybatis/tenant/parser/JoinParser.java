@@ -10,14 +10,16 @@ import java.util.regex.Pattern;
  */
 public class JoinParser extends SelectParser {
 
+    public static final Pattern join = Pattern.compile("(left|right|cross)? join" + TABLE_NAME + "( as)?" + TABLE_NAME + "[, ]+", mask);
+
     public JoinParser(ParsedSQL<String> parsedSQL) {
         super(parsedSQL.getSql());
         this.parsedSQL = parsedSQL;
-        this.pattern = Pattern.compile("(left|right|cross)? join" + TABLE_NAME + TABLE_NAME + "[, ]+", mask);
+        this.pattern = join;
     }
 
     public ParsedSQL<String> parse() {
-        return parse(2, 3);
+        return parse(2, 4);
     }
 
 }

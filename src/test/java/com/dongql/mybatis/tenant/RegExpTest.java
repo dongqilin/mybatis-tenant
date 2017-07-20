@@ -1,6 +1,8 @@
 package com.dongql.mybatis.tenant;
 
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
+import com.dongql.mybatis.tenant.parser.JoinParser;
+import com.dongql.mybatis.tenant.parser.SelectParser;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,7 +17,7 @@ import static com.dongql.mybatis.tenant.parser.SelectParser.select;
 public class RegExpTest {
 
     @BeforeClass
-    public static void before(){
+    public static void before() {
         TestUtil.init();
     }
 
@@ -37,7 +39,35 @@ public class RegExpTest {
     }
 
     @Test
-    public void join(){
+    public void select() {
+        String sql = "SELECT create_time,update_time,room_id,name,floor_id,build_id  FROM basic_room";
+        Matcher matcher = SelectParser.select.matcher(sql);
+        if (matcher.find()) {
+            String group = matcher.group();
+            System.out.println(matcher.group(1));
+        }
+        sql = "        r.room_id as basicRoomId,\n" +
+                "        r.name as room_name\n" +
+                "        from\n" +
+                "        basic_build as b\n" +
+                "        left join basic_floor as f on b.build_id=f.build_id\n" +
+                "        left join basic_room as r on f.floor_id=r.floor_id";
+        matcher = SelectParser.select.matcher(sql);
+        if (matcher.find()) {
+            String group = matcher.group();
+            System.out.println(matcher.group(1));
+            System.out.println(matcher.group(3));
+        }
+        matcher = JoinParser.join.matcher(sql);
+        while (matcher.find()) {
+            String group = matcher.group();
+            System.out.println(matcher.group(2));
+            System.out.println(matcher.group(4));
+        }
+    }
+
+    @Test
+    public void join() {
 //        String sql = "SELECT u.*, d.data_value vipName FROM user u join sys_static_data d on d.data_key='vip_level' and d.data_key=u.vip WHERE uid = ?";
 //        ParsedSQL<String> result = SQLParserUtil.parse("sss", SqlCommandType.SELECT, sql);
 //        System.out.println(result.getSql());
