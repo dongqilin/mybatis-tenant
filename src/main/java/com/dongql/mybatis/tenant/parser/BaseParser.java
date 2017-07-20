@@ -33,6 +33,7 @@ public abstract class BaseParser {
     public abstract ParsedSQL<String> parse();
 
     ParsedSQL<String> parse(int nameIndex, int aliasIndex) {
+        sql = sql.replaceAll("\n", " ").replaceAll(" +", " ");
         if (TenantContext.isStarted()) {
             return tenant(nameIndex, aliasIndex);
         } else {
@@ -106,9 +107,9 @@ public abstract class BaseParser {
     /**
      * When {@link MultiTenantType#SCHEMA} set, transform table name with tenant schema prefix.
      *
-     * @param matcher
-     * @param group
-     * @param name
+     * @param matcher regexp matcher
+     * @param group   match result
+     * @param name    table name
      */
     public void parseSchema(Matcher matcher, String group, String name) {
         if (result == null) result = new StringBuffer();
@@ -130,8 +131,11 @@ public abstract class BaseParser {
         String column = cache.getColumn();
 
         ParsedSQL<String> schema = schema(nameIndex);
+        sql = schema.getSql();
 
-        if (result == null) result = new StringBuffer(schema.getSql());
+        if (result == null) {
+            result = new StringBuffer(sql);
+        }
 
         String temp = sql.toLowerCase().contains("where") ? " and " : " where ";
         boolean ifNoAlias = alias == null || alias.isEmpty() || alias.equalsIgnoreCase("where");

@@ -40,18 +40,25 @@ public class RegExpTest {
 
     @Test
     public void select() {
-        String sql = "SELECT create_time,update_time,room_id,name,floor_id,build_id  FROM basic_room";
-        Matcher matcher = SelectParser.select.matcher(sql);
-        if (matcher.find()) {
-            String group = matcher.group();
-            System.out.println(matcher.group(1));
-        }
-        sql = "        r.room_id as basicRoomId,\n" +
-                "        r.name as room_name\n" +
-                "        from\n" +
-                "        basic_build as b\n" +
-                "        left join basic_floor as f on b.build_id=f.build_id\n" +
-                "        left join basic_room as r on f.floor_id=r.floor_id";
+        String sql;
+        Matcher matcher;
+//        sql = "SELECT create_time,update_time,room_id,name,floor_id,build_id  FROM basic_room";
+//        matcher = SelectParser.select.matcher(sql);
+//        if (matcher.find()) {
+//            String group = matcher.group();
+//            System.out.println(matcher.group(1));
+//        }
+//        sql = "        r.room_id as basicRoomId,\n" +
+//                "        r.name as room_name\n" +
+//                "        from\n" +
+//                "        basic_build as b\n" +
+//                "        left join basic_floor as f on b.build_id=f.build_id\n" +
+//                "        left join basic_room as r on f.floor_id=r.floor_id";
+        sql = "SELECT bf.*\n" +
+                "        FROM basic_floor bf\n" +
+                "        RIGHT JOIN basic_room br ON br.`floor_id` = bf.`floor_id`\n" +
+                "         WHERE  bf.`build_id` = ? \n" +
+                "        GROUP BY bf.`name`";
         matcher = SelectParser.select.matcher(sql);
         if (matcher.find()) {
             String group = matcher.group();
