@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.io.Serializable;
 
 /**
@@ -31,7 +30,6 @@ public class User implements Serializable {
     private Gender gender;
     private VipLevel vip;
 
-    @Transient
     private String tenant;
 
     @Override

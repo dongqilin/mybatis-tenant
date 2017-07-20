@@ -13,11 +13,7 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
@@ -27,11 +23,7 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -84,12 +76,14 @@ public class MultiTenantInterceptor implements Interceptor {
                 parameterMappings = new ArrayList<>();
             }
             for (ParsedParam<String> p : params) {
-                ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
-                int position = p.getPosition();
-                if (position > 0)
-                    parameterMappings.add(parameterMappings.size() - position, mapping);
-                else
-                    parameterMappings.add(mapping);
+                if (p.isAdd()) {
+                    ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
+                    int position = p.getPosition();
+                    if (position > 0)
+                        parameterMappings.add(parameterMappings.size() - position, mapping);
+                    else
+                        parameterMappings.add(mapping);
+                }
                 boundSql.setAdditionalParameter(p.getParam(), p.getValue());
             }
             metaStatementHandler.setValue("delegate.boundSql.parameterMappings", parameterMappings);
@@ -149,7 +143,7 @@ public class MultiTenantInterceptor implements Interceptor {
                     }
 
                     if (type == null) {
-                        TableCache.none(table);
+                        TableCache.none(schema, table);
                     } else {
                         switch (type) {
                             case COLUMN:

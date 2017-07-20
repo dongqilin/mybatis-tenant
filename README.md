@@ -24,10 +24,6 @@
 @MultiTenant(type = MultiTenantType.COLUMN)
 @MultiTenantColumn(value = "tenant")
 public class User implements Serializable {
-    
-    // 标识字段不持久化，插件处理
-    @Transient
-    private String tenant;
 
 }
 ```

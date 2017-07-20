@@ -10,11 +10,21 @@ public class ParsedParam<T> {
     private Class<T> javaType;
     private int position;
 
+    /**
+     * when insert, add = false
+     */
+    private boolean add = true;
+
     public ParsedParam(String param, T value, Class<T> javaType, int position) {
+        this(param, value, javaType, position, true);
+    }
+
+    public ParsedParam(String param, T value, Class<T> javaType, int position, boolean add) {
         this.param = param;
         this.value = value;
         this.javaType = javaType;
         this.position = position;
+        this.add = add;
     }
 
     public String getParam() {
@@ -47,5 +57,13 @@ public class ParsedParam<T> {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public boolean isAdd() {
+        return add;
+    }
+
+    public void setAdd(boolean add) {
+        this.add = add;
     }
 }

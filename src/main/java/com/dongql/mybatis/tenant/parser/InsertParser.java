@@ -35,13 +35,12 @@ public class InsertParser extends BaseParser {
 
         Matcher matcher = values.matcher(schema.getSql());
         if (matcher.find()) {
-            if (result == null) result = new StringBuffer();
-            String valuesKeyword = matcher.group();
-            matcher.appendReplacement(result, "," + column + valuesKeyword + "?,");
-            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, -1));
+            if (result == null) result = new StringBuffer(sql);
+//            String valuesKeyword = matcher.group();
+//            matcher.appendReplacement(result, valuesKeyword + "?,");
+            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, -1, false));
         }
-
-        matcher.appendTail(result);
+//        matcher.appendTail(result);
     }
 
 }

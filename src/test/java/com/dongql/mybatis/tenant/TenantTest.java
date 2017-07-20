@@ -1,7 +1,6 @@
 package com.dongql.mybatis.tenant;
 
 import com.dongql.mybatis.tenant.entity.User;
-import com.dongql.mybatis.tenant.entity.vo.UserVo;
 import com.dongql.mybatis.tenant.enums.Gender;
 import com.dongql.mybatis.tenant.enums.VipLevel;
 import com.dongql.mybatis.tenant.mapper.IStaticDataMapper;
@@ -63,28 +62,29 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
 //
 //        userMapper.deleteUser(user.getUid());
 
-        TenantContext.start();
+//        TenantContext.start();
 
 //        List<StaticData> vipLevel = staticDataMapper.getDataList("vip_level");
 //        System.out.println(vipLevel);
 
-        UserVo userWithVip = userMapper.getUserWithVip(600841005L);
-        System.out.println(userWithVip);
+//        UserVo userWithVip = userMapper.getUserWithVip(600841005L);
+//        System.out.println(userWithVip);
 
     }
 
     @Test
     public void service(){
 
+        TenantContext.start();
         userService.save(user);
 
-        user.setUserName("yyyyyyyy");
-        userService.update(user);
-
-        User u = userService.get(user.getUid());
-        System.out.println(u);
-
-        userService.delete(this.user);
+//        user.setUserName("yyyyyyyy");
+//        userService.update(user);
+//
+//        User u = userService.get(user.getUid());
+//        System.out.println(u);
+//
+//        userService.delete(this.user);
     }
 
     @Test

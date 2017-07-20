@@ -47,8 +47,8 @@ public class TableCache {
         return new TableCache(name, MultiTenantType.DATABASE, null);
     }
 
-    public static TableCache none(String name) {
-        return new TableCache(name, MultiTenantType.NONE, null);
+    public static TableCache none(String schema, String name) {
+        return new TableCache(schema, name, MultiTenantType.NONE, null);
     }
 
     public static TableCache get(String name) {
