@@ -1,6 +1,7 @@
 package com.dongql.mybatis.tenant.mapper;
 
 import com.dongql.mybatis.tenant.entity.User;
+import com.dongql.mybatis.tenant.entity.vo.UserPasswordAndVipVo;
 import com.dongql.mybatis.tenant.entity.vo.UserPasswordVo;
 import com.dongql.mybatis.tenant.entity.vo.UserVo;
 import org.apache.ibatis.annotations.Param;
@@ -20,6 +21,8 @@ public interface IUserMapper extends Mapper<User> {
     UserVo getUserWithVip(@Param("userId") Long uid);
 
     UserPasswordVo getUserWithPassword(@Param("userId") Long uid);
+
+    UserPasswordAndVipVo getUserWithPasswordAndVip(@Param("userId") Long uid);
 
     @Select("SELECT * FROM user")
     List<User> getUsers();

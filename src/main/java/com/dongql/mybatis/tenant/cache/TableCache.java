@@ -27,7 +27,7 @@ public class TableCache {
         this.name = name;
         this.type = type;
         this.column = column;
-        this.schema = schema == null ? "" : schema + ".";
+        this.schema = schema == null || schema.isEmpty() ? "" : schema + ".";
         CACHE.put(name, this);
     }
 

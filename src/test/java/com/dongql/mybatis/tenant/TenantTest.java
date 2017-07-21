@@ -1,6 +1,10 @@
 package com.dongql.mybatis.tenant;
 
+import com.dongql.mybatis.tenant.entity.StaticData;
 import com.dongql.mybatis.tenant.entity.User;
+import com.dongql.mybatis.tenant.entity.vo.UserPasswordAndVipVo;
+import com.dongql.mybatis.tenant.entity.vo.UserPasswordVo;
+import com.dongql.mybatis.tenant.entity.vo.UserVo;
 import com.dongql.mybatis.tenant.enums.Gender;
 import com.dongql.mybatis.tenant.enums.VipLevel;
 import com.dongql.mybatis.tenant.mapper.IStaticDataMapper;
@@ -31,7 +35,7 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
     private User user;
 
     @BeforeClass
-    public static void initG(){
+    public static void initG() {
 
     }
 
@@ -46,49 +50,53 @@ public class TenantTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void tenant() {
+        long uid = 600841005L;
 
-//        userMapper.getUsers();
-//
-//        userMapper.getUser(600841005L);
-//        userMapper.getUserByName("其林");
-//
-//        UserPasswordVo userWithPassword = userMapper.getUserWithPassword(600841005L);
-//        System.out.println(userWithPassword);
-//
-//        userMapper.insertUser(user);
-//
-//        user.setUserName("yyyyyyyy");
-//        userMapper.updateUser(user);
-//
-//        userMapper.deleteUser(user.getUid());
+        userMapper.getUsers();
 
-//        TenantContext.start();
+        userMapper.getUser(uid);
+        userMapper.getUserByName("其林");
 
-//        List<StaticData> vipLevel = staticDataMapper.getDataList("vip_level");
-//        System.out.println(vipLevel);
+        UserPasswordVo userWithPassword = userMapper.getUserWithPassword(uid);
+        System.out.println(userWithPassword);
 
-//        UserVo userWithVip = userMapper.getUserWithVip(600841005L);
-//        System.out.println(userWithVip);
+        userMapper.insertUser(user);
+
+        user.setUserName("yyyyyyyy");
+        userMapper.updateUser(user);
+
+        userMapper.deleteUser(user.getUid());
+
+        TenantContext.start();
+
+        List<StaticData> vipLevel = staticDataMapper.getDataList("vip_level");
+        System.out.println(vipLevel);
+
+        UserVo userWithVip = userMapper.getUserWithVip(uid);
+        System.out.println(userWithVip);
+
+        UserPasswordAndVipVo userWithPasswordAndVip = userMapper.getUserWithPasswordAndVip(uid);
+        System.out.println(userWithPasswordAndVip);
 
     }
 
     @Test
-    public void service(){
+    public void service() {
 
         TenantContext.start();
         userService.save(user);
 
-//        user.setUserName("yyyyyyyy");
-//        userService.update(user);
-//
-//        User u = userService.get(user.getUid());
-//        System.out.println(u);
-//
-//        userService.delete(this.user);
+        user.setUserName("yyyyyyyy");
+        userService.update(user);
+
+        User u = userService.get(user.getUid());
+        System.out.println(u);
+
+        userService.delete(this.user);
     }
 
     @Test
-    public void pager(){
+    public void pager() {
         Pager<User> pager = new Pager<>();
         pager.setUsePager(true);
         pager.setOffset(2);

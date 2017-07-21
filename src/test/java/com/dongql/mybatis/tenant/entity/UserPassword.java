@@ -14,7 +14,7 @@ import java.io.Serializable;
  * 用户表，共享表实现多租户
  * Created by dongql on 10/01/2016.
  */
-@Table
+@Table(schema = "dongql")
 @MultiTenant(type = MultiTenantType.COLUMN)
 @MultiTenantColumn
 public class UserPassword implements Serializable {

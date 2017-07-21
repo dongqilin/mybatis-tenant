@@ -13,7 +13,11 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMapping;
 import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.plugin.Intercepts;
+import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
+import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
@@ -23,11 +27,18 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.Table;
 import java.lang.annotation.Annotation;
 import java.sql.Connection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.dongql.mybatis.tenant.SQLParserUtil.tableName;
+import static com.dongql.mybatis.tenant.parser.BaseParser.mask;
 
 /**
  * Mybatis - 多租户拦截器
@@ -50,6 +61,8 @@ public class MultiTenantInterceptor implements Interceptor {
 
     private static AtomicBoolean initial = new AtomicBoolean(true);
 
+    public static final Pattern pageHelper = Pattern.compile("select count\\(0\\) from \\((.*)\\) tmp_count", mask);
+
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
 
@@ -63,7 +76,17 @@ public class MultiTenantInterceptor implements Interceptor {
 
         BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
 
-        String sql = boundSql.getSql();
+        String sql = boundSql.getSql()
+                .replaceAll("\n", " ")
+                .replaceAll(" +", " ")
+                .replaceAll("`", "");
+
+        boolean pager = false;
+        Matcher matcher = pageHelper.matcher(sql);
+        if (matcher.find()) {
+            pager = true;
+            sql = matcher.group(1);
+        }
 
         ParsedSQL<String> result = SQLParserUtil.parse(id, type, sql);
         if (result == null) return invocation.proceed();
@@ -88,10 +111,13 @@ public class MultiTenantInterceptor implements Interceptor {
             }
             metaStatementHandler.setValue("delegate.boundSql.parameterMappings", parameterMappings);
         }
+        String resultSql = result.getSql();
         if (logger.isDebugEnabled())
-            logger.debug("tenant interceptor: \nbefore: " + sql + "\n after: " + result.getSql());
+            logger.debug("tenant interceptor: \nbefore: " + sql + "\n after: " + resultSql);
 
-        metaStatementHandler.setValue("delegate.boundSql.sql", result.getSql());
+        if (pager) resultSql = "select count(0) from (" + resultSql + ") tmp_count";
+
+        metaStatementHandler.setValue("delegate.boundSql.sql", resultSql);
 
         return invocation.proceed();
     }

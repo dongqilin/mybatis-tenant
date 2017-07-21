@@ -27,20 +27,16 @@ public class InsertParser extends BaseParser {
     }
 
     @Override
-    public void parseColumn(int nameIndex, String name, String alias) {
+    public void parseColumn(Matcher matcher, int nameIndex, int aliasIndex) {
+
+        String name = matcher.group(nameIndex);
         TableCache cache = TableCache.get(name);
         String column = cache.getColumn();
 
-        ParsedSQL<String> schema = schema(nameIndex);
-
-        Matcher matcher = values.matcher(schema.getSql());
-        if (matcher.find()) {
-            if (result == null) result = new StringBuffer(sql);
-//            String valuesKeyword = matcher.group();
-//            matcher.appendReplacement(result, valuesKeyword + "?,");
+        Matcher valueMatcher = values.matcher(sql);
+        if (valueMatcher.find()) {
             parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, -1, false));
         }
-//        matcher.appendTail(result);
     }
 
 }

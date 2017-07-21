@@ -21,6 +21,14 @@
          WHERE u.uid = #{userId}
     </select>
 
+    <select id="getUserWithPasswordAndVip" parameterType="Long" resultType="UserPasswordAndVipVo">
+        SELECT u.*, p.password, p.salt
+          FROM user u
+          join user_password p on u.uid = p.uid
+          left join sys_static_data d on d.data_key='vip_level' and d.data_code = u.vip
+         WHERE u.uid = #{userId}
+    </select>
+
     <select id="getUserByName" parameterType="String" resultType="user">
         <bind name="likeUsername" value="'%' + userName + '%'"/>
         select * from user
