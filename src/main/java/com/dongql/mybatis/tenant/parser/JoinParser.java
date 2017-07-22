@@ -26,12 +26,24 @@ public class JoinParser extends SelectParser {
         return parse(2, 4);
     }
 
+    public void parseColumn(Matcher matcher, int nameIndex, int aliasIndex) {
+        result = new StringBuffer();
+        matchColumn(matcher, nameIndex, aliasIndex);
+        while (matcher.find()) {
+            matchColumn(matcher, nameIndex, aliasIndex);
+        }
+        matcher.appendTail(result);
+    }
+
     @Override
     public void matchColumn(Matcher matcher, int nameIndex, int aliasIndex) {
         String name = matcher.group(nameIndex);
 
         TableCache cache = TableCache.get(name);
         if (cache.getType() == MultiTenantType.COLUMN) {
+
+            String group = matcher.group();
+
             String column = cache.getColumn();
 
             String alias = aliasIndex < 1 ? null : matcher.group(aliasIndex);
@@ -40,7 +52,8 @@ public class JoinParser extends SelectParser {
             String on = matcher.group(5);
             boolean hasOn = on == null || on.isEmpty();
             String tenantClause = (hasOn ? " on " : " ") + (ifNoAlias ? name : alias) + "." + column + " = ?" + (hasOn ? " " : " and ");
-            result.insert(matcher.end(), tenantClause);
+            matcher.appendReplacement(result, group + tenantClause);
+//            result.insert(matcher.end(), tenantClause);
 
             int position = position(sql, matcher.start());
             parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));

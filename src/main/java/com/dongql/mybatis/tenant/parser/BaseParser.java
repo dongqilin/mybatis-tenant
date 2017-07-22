@@ -77,7 +77,6 @@ public abstract class BaseParser {
         if (matcher.find()) {
             MultiTenantType type = getMultiTenantType(nameIndex, matcher);
             if (type == MultiTenantType.COLUMN) {
-                result = new StringBuffer(sql);
                 parseColumn(matcher, nameIndex, aliasIndex);
             }
         }
@@ -88,8 +87,8 @@ public abstract class BaseParser {
 
         matcher = pattern.matcher(sql);
         if (matcher.find()) {
-                result = new StringBuffer();
-                parseSchema(matcher, nameIndex);
+            result = new StringBuffer();
+            parseSchema(matcher, nameIndex);
         }
         if (result != null) sql = result.toString();
 
@@ -124,7 +123,7 @@ public abstract class BaseParser {
         String group = matcher.group();
         String name = matcher.group(nameIndex);
         MultiTenantType type = getMultiTenantType(nameIndex, matcher);
-        if(type == MultiTenantType.SCHEMA){
+        if (type == MultiTenantType.SCHEMA) {
             String after = group.replaceFirst(name, getSchemaPrefix() + tenant + "." + name);
             matcher.appendReplacement(result, after);
         }
@@ -139,6 +138,7 @@ public abstract class BaseParser {
      * @see BaseParser#schema
      */
     public void parseColumn(Matcher matcher, int nameIndex, int aliasIndex) {
+        result = new StringBuffer(sql);
         matchColumn(matcher, nameIndex, aliasIndex);
         while (matcher.find()) {
             matchColumn(matcher, nameIndex, aliasIndex);
@@ -150,7 +150,7 @@ public abstract class BaseParser {
         String alias = aliasIndex < 1 ? null : matcher.group(aliasIndex);
 
         TableCache cache = TableCache.get(name);
-        if(cache.getType() == MultiTenantType.COLUMN) {
+        if (cache.getType() == MultiTenantType.COLUMN) {
             String column = cache.getColumn();
 
             String temp = sql.toLowerCase().contains("where") ? " and " : " where ";
