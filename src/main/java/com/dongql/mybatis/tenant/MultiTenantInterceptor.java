@@ -61,7 +61,7 @@ public class MultiTenantInterceptor implements Interceptor {
 
     private static AtomicBoolean initial = new AtomicBoolean(true);
 
-    public static final Pattern pageHelper = Pattern.compile("select count\\(0\\) from \\((.*)\\) tmp_count", mask);
+    public static final Pattern pageHelper = Pattern.compile("select count\\(0\\) from \\((.*)\\) .*_count", mask);
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {

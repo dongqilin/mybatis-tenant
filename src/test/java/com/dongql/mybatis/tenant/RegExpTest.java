@@ -128,14 +128,14 @@ public class RegExpTest {
 
     @Test
     public void count(){
-        String sql = "select count(0) from (sdfa) tmp_count".replaceAll("\n", " ")
+        String sql = "select count(0) FROM (sdfa) tmp_count".replaceAll("\n", " ")
                         .replaceAll(" +", " ")
                         .replaceAll("`", "");
         boolean pager = false;
         Matcher matcher = pageHelper.matcher(sql);
         if(matcher.find()){
             pager = true;
-            sql = matcher.group();
+            sql = matcher.group(1);
             System.out.println(sql);
         }
         String resultSql = "adafdfasdf";
