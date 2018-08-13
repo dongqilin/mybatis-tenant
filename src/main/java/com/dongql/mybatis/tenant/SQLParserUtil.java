@@ -28,7 +28,7 @@ public class SQLParserUtil {
      * @return 下划线连接形式
      */
     public static String tableName(String name) {
-        Matcher matcher = Pattern.compile("([A-Z][a-z]*)").matcher(name);
+        Matcher matcher = Pattern.compile("([A-Z][a-z0-9]*)").matcher(name);
         StringJoiner table = new StringJoiner("_");
         while (matcher.find()) {
             table.add(matcher.group().toLowerCase());

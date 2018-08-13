@@ -13,7 +13,7 @@ public class DeleteParser extends BaseParser {
     public DeleteParser(String sql) {
         this.parsedSQL = new ParsedSQL<>();
         this.sql = sql;
-        this.pattern = Pattern.compile("^delete from" + TABLE_NAME + " ", mask);
+        this.pattern = Pattern.compile("^delete from" + TABLE_NAME + "[\n ]*", mask);
     }
 
     @Override

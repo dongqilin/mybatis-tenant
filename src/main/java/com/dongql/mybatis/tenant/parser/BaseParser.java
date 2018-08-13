@@ -2,7 +2,6 @@ package com.dongql.mybatis.tenant.parser;
 
 import com.dongql.mybatis.tenant.TenantContext;
 import com.dongql.mybatis.tenant.annotations.MultiTenantType;
-import com.dongql.mybatis.tenant.cache.ParsedParam;
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
 import com.dongql.mybatis.tenant.cache.TableCache;
 
@@ -74,11 +73,8 @@ public abstract class BaseParser {
     private ParsedSQL<String> tenant(int nameIndex, int aliasIndex) {
 
         Matcher matcher = pattern.matcher(sql);
-        if (matcher.find()) {
-            MultiTenantType type = getMultiTenantType(nameIndex, matcher);
-            if (type == MultiTenantType.COLUMN) {
-                parseColumn(matcher, nameIndex, aliasIndex);
-            }
+        while (matcher.find()) {
+            parseColumn(matcher, nameIndex, aliasIndex);
         }
         if (result != null) {
             sql = result.toString();
@@ -99,7 +95,7 @@ public abstract class BaseParser {
         return parsedSQL;
     }
 
-    private MultiTenantType getMultiTenantType(int nameIndex, Matcher matcher) {
+    protected MultiTenantType getMultiTenantType(int nameIndex, Matcher matcher) {
         String name = matcher.group(nameIndex);
         TableCache cache = TableCache.get(name);
         return cache.getType();
@@ -157,7 +153,7 @@ public abstract class BaseParser {
             boolean ifNoAlias = alias == null || alias.isEmpty() || alias.equalsIgnoreCase("where");
             StringBuilder tenantClause = new StringBuilder().append(temp)
                     .append(ifNoAlias ? name : alias).append(".")
-                    .append(column).append(" = ?");
+                    .append(column).append(" = '" + tenant + "'");
             Matcher suffixMatcher = suffix.matcher(sql);
             int position = -1;
             if (suffixMatcher.find()) {
@@ -167,7 +163,7 @@ public abstract class BaseParser {
             } else {
                 result.append(tenantClause.toString());
             }
-            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));
+//            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));
         }
     }
 

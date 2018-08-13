@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 public class SelectParser extends BaseParser {
 
-    public static final Pattern select = Pattern.compile(" from" + TABLE_NAME +"( as)?"+ TABLE_NAME + "?[, ]?", mask);
+    public static final Pattern select = Pattern.compile(" from " + TABLE_NAME +"( as)?"+ TABLE_NAME + "?[, ]?", mask);
 
     public SelectParser(String sql) {
         this.sql = sql;

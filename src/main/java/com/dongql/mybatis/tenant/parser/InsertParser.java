@@ -1,8 +1,6 @@
 package com.dongql.mybatis.tenant.parser;
 
-import com.dongql.mybatis.tenant.cache.ParsedParam;
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
-import com.dongql.mybatis.tenant.cache.TableCache;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,15 +26,15 @@ public class InsertParser extends BaseParser {
 
     @Override
     public void parseColumn(Matcher matcher, int nameIndex, int aliasIndex) {
-
-        String name = matcher.group(nameIndex);
-        TableCache cache = TableCache.get(name);
-        String column = cache.getColumn();
-
-        Matcher valueMatcher = values.matcher(sql);
-        if (valueMatcher.find()) {
-            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, -1, false));
-        }
+//
+//        String name = matcher.group(nameIndex);
+//        TableCache cache = TableCache.get(name);
+//        String column = cache.getColumn();
+//
+//        Matcher valueMatcher = values.matcher(sql);
+//        if (valueMatcher.find()) {
+//            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, -1, false));
+//        }
     }
 
 }

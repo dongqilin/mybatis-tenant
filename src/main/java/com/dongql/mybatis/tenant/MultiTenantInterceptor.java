@@ -42,7 +42,9 @@ import static com.dongql.mybatis.tenant.parser.BaseParser.mask;
 
 /**
  * Mybatis - 多租户拦截器
- * Created by dongqilin on 01/07/2017.
+ *
+ * @author dongqilin
+ * @date 01/07/2017
  */
 @Intercepts({
 //        @Signature(type = StatementHandler.class, method = "query", args = {Statement.class, ResultHandler.class}),
@@ -81,6 +83,10 @@ public class MultiTenantInterceptor implements Interceptor {
                 .replaceAll(" +", " ")
                 .replaceAll("`", "");
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("tenant interceptor - before: " + sql);
+        }
+
         boolean pager = false;
         Matcher matcher = pageHelper.matcher(sql);
         if (matcher.find()) {
@@ -89,7 +95,9 @@ public class MultiTenantInterceptor implements Interceptor {
         }
 
         ParsedSQL<String> result = SQLParserUtil.parse(id, type, sql);
-        if (result == null) return invocation.proceed();
+        if (result == null) {
+            return invocation.proceed();
+        }
 
         List<ParsedParam<String>> params = result.getParams();
         if (params != null) {
@@ -102,20 +110,24 @@ public class MultiTenantInterceptor implements Interceptor {
                 if (p.isAdd()) {
                     ParameterMapping mapping = new ParameterMapping.Builder(configuration, p.getParam(), p.getJavaType()).build();
                     int position = p.getPosition();
-                    if (position > 0)
+                    if (position > 0) {
                         parameterMappings.add(parameterMappings.size() - position, mapping);
-                    else
+                    } else {
                         parameterMappings.add(mapping);
+                    }
                 }
                 boundSql.setAdditionalParameter(p.getParam(), p.getValue());
             }
             metaStatementHandler.setValue("delegate.boundSql.parameterMappings", parameterMappings);
         }
         String resultSql = result.getSql();
-        if (logger.isDebugEnabled())
-            logger.debug("tenant interceptor: \nbefore: " + sql + "\n after: " + resultSql);
+        if (logger.isDebugEnabled()) {
+            logger.debug("tenant interceptor: - after: " + resultSql);
+        }
 
-        if (pager) resultSql = "select count(0) from (" + resultSql + ") tmp_count";
+        if (pager) {
+            resultSql = "select count(0) from (" + resultSql + ") tmp_count";
+        }
 
         metaStatementHandler.setValue("delegate.boundSql.sql", resultSql);
 
@@ -135,7 +147,9 @@ public class MultiTenantInterceptor implements Interceptor {
                 // 找到系统中所有注解了@Entity的类
                 Set<Class> entities = typeAliases.values().stream().filter(v -> {
                     for (Annotation an : v.getAnnotations()) {
-                        if (an instanceof Table) return true;
+                        if (an instanceof Table) {
+                            return true;
+                        }
                     }
                     return false;
                 }).collect(Collectors.toSet());
@@ -157,7 +171,6 @@ public class MultiTenantInterceptor implements Interceptor {
                         } else if (an instanceof MultiTenant) {
                             MultiTenant tenant = (MultiTenant) an;
                             type = tenant.type();
-//                        contextProperty = tenant.contextProperty();
                         } else if (an instanceof MultiTenantColumn) {
                             MultiTenantColumn tenant = (MultiTenantColumn) an;
                             column = tenant.value();
@@ -173,8 +186,9 @@ public class MultiTenantInterceptor implements Interceptor {
                     } else {
                         switch (type) {
                             case COLUMN:
-                                if (column == null)
+                                if (column == null) {
                                     throw new TenantAnnotationException(entity.getName() + " annotated by @MultiTenant[COLUMN] without @MultiTenantColumn");
+                                }
                                 TableCache.newColumnCache(schema, table, column);
                                 break;
                             case TABLE:
@@ -186,6 +200,7 @@ public class MultiTenantInterceptor implements Interceptor {
                             case DATABASE:
                                 TableCache.newDatabaseCache(table);
                                 break;
+                            default:
                         }
                     }
                 });
@@ -200,7 +215,9 @@ public class MultiTenantInterceptor implements Interceptor {
     public void setProperties(Properties properties) {
         if (properties.containsKey("tenantStart")) {
             boolean flag = Boolean.parseBoolean(properties.get("tenantStart").toString());
-            if (flag) TenantContext.start();
+            if (flag) {
+                TenantContext.start();
+            }
         }
         if (properties.containsKey("schemaPrefix")) {
             schemaPrefix = properties.get("schemaPrefix").toString();

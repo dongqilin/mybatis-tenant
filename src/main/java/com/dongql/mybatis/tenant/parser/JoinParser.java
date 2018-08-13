@@ -1,7 +1,6 @@
 package com.dongql.mybatis.tenant.parser;
 
 import com.dongql.mybatis.tenant.annotations.MultiTenantType;
-import com.dongql.mybatis.tenant.cache.ParsedParam;
 import com.dongql.mybatis.tenant.cache.ParsedSQL;
 import com.dongql.mybatis.tenant.cache.TableCache;
 
@@ -51,12 +50,12 @@ public class JoinParser extends SelectParser {
 
             String on = matcher.group(5);
             boolean hasOn = on == null || on.isEmpty();
-            String tenantClause = (hasOn ? " on " : " ") + (ifNoAlias ? name : alias) + "." + column + " = ?" + (hasOn ? " " : " and ");
+            String tenantClause = (hasOn ? " on " : " ") + (ifNoAlias ? name : alias) + "." + column + " = '" + tenant + "'" + (hasOn ? " " : " and ");
             matcher.appendReplacement(result, group + tenantClause);
-//            result.insert(matcher.end(), tenantClause);
 
-            int position = position(sql, matcher.start());
-            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));
+//            result.insert(matcher.end(), tenantClause);
+//            int position = position(sql, matcher.start());
+//            parsedSQL.addParam(new ParsedParam<>(column, tenant, String.class, position));
         }
     }
 

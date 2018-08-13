@@ -4,7 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Mybatis - 多租户拦截器
- * Created by dongqilin on 01/07/2017.
+ *
+ * @author dongqilin
+ * @date 01/07/2017
  */
 public class TenantContext {
 
